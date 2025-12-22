@@ -130,14 +130,10 @@ export class SpreadLinesVisualizer {
     const lifeSpans = this.storylines.map(d => d.lifespan);
     const quantile80 = d3.quantile(lifeSpans, 0.8);
     const toShowLabel = Math.min(quantile80 || 20, 20);
-    console.log('📊 Label visibility: quantile80=', quantile80, 'toShowLabel=', toShowLabel);
     this.storylines = this.storylines.map(d => ({
       ...d,
       label: { ...d.label, show: d.lifespan > toShowLabel ? 'visible' : 'hidden' },
     }));
-    const visibleCount = this.storylines.filter(d => d.label.show === 'visible').length;
-    const hiddenCount = this.storylines.filter(d => d.label.show === 'hidden').length;
-    console.log('📊 Labels: visible=', visibleCount, 'hidden=', hiddenCount);
 
     // Create tooltip if enabled
     if (this.config.tooltip.showLinkTooltip || this.config.tooltip.showPointTooltip) {
@@ -153,36 +149,22 @@ export class SpreadLinesVisualizer {
     this._drawBlocksAndPoints();
     this._drawLabels();
 
-    // DEBUG: Global click handler to see what element receives clicks
-    chartContainer.on('click', (event: MouseEvent) => {
-      const target = event.target as SVGElement;
-      console.log('🎯 SVG clicked!', {
-        target: target.tagName,
-        id: target.id,
-        class: target.getAttribute('class'),
-        parentId: (target.parentNode as SVGElement)?.id,
-        parentClass: (target.parentNode as SVGElement)?.getAttribute('class'),
-      });
-    });
-
     // Apply initial label visibility - match original exactly
     if (this._HIDE_LABELS === 'some') {
       const ego = this._EGO;
       const storylines = this.storylines;
       // Original uses two chained filters
-      const labelsToHide = d3.selectAll('.labels,.mark-links')
+      d3.selectAll('.labels,.mark-links')
         .filter((d: unknown) => (d as { name: string }).name !== ego)
         .filter((d: unknown) => {
           const data = d as { name: string; label?: { show?: string } };
-          // Original: if (d.label !== undefined) return !(d.label.show == "visible")
           if (data.label !== undefined) {
             return data.label.show !== 'visible';
           }
           const entity = storylines.find(e => e.name === data.name);
           return entity?.label.show !== 'visible';
-        });
-      console.log('📊 Labels to hide:', labelsToHide.size());
-      labelsToHide.style('visibility', 'hidden');
+        })
+        .style('visibility', 'hidden');
     }
 
     // Inject styles
@@ -264,10 +246,7 @@ export class SpreadLinesVisualizer {
           })
           .style('cursor', 'pointer')
           .on('click', function(event: MouseEvent, d: TimeLabel) {
-            console.log('📅 Time label clicked!', { label: d.label, posX: d.posX });
-            // Find the block for this year/time and toggle expansion
             const block = self.data.blocks.find(b => b.time === d.label);
-            console.log('📅 Found block?', block ? { id: block.id, time: block.time } : 'none');
             if (block) {
               self._blockUpdate(event, block);
             }
@@ -389,8 +368,6 @@ export class SpreadLinesVisualizer {
     const self = this;
     const nodeColorScale = this.nodeColorScale;
 
-    console.log('🔧 _drawBlocksAndPoints called, blocks:', this.data.blocks.length);
-
     this.chartContainer
       .append('g')
       .attr('id', 'block-container')
@@ -398,8 +375,6 @@ export class SpreadLinesVisualizer {
       .selectAll('g')
       .data(this.data.blocks)
       .join(enter => {
-        console.log('🔧 Creating block containers for', enter.size(), 'blocks');
-        // Match original structure exactly: enter.append('g').append('g').on('click', this._blockUpdate)
         const container = enter
           .append('g')
           .attr('class', 'arcs')
@@ -407,7 +382,6 @@ export class SpreadLinesVisualizer {
           .append('g')
           .attr('id', d => `block-click-${d.id}`)
           .on('click', (event: MouseEvent, d: Block) => {
-            console.log('🔴 Block container clicked!', { id: d.id, time: d.time });
             this._blockUpdate(event, d);
           });
 
@@ -418,10 +392,7 @@ export class SpreadLinesVisualizer {
           .attr('class', d => `movable station-arcs left-arcs left-arc-${d.time}`)
           .attr('d', d => d.outline.left)
           .attr('transform', 'translate(0, 0)')
-          .attr('active', 0)
-          .on('click', (event: MouseEvent, d: Block) => {
-            console.log('🟡 Left arc PATH clicked!', { id: d.id, time: d.time });
-          });
+          .attr('active', 0);
 
         // Right arc
         container
@@ -429,10 +400,7 @@ export class SpreadLinesVisualizer {
           .attr('id', d => `right-arc-${d.id}`)
           .attr('class', 'movable station-arcs')
           .attr('d', d => d.outline.right)
-          .attr('transform', 'translate(0, 0)')
-          .on('click', (event: MouseEvent, d: Block) => {
-            console.log('🟢 Right arc PATH clicked!', { id: d.id, time: d.time });
-          });
+          .attr('transform', 'translate(0, 0)');
 
         // Horizontal bars (hidden until expanded)
         container
@@ -722,45 +690,27 @@ export class SpreadLinesVisualizer {
    * Block click handler - expand/collapse
    */
   private _blockUpdate = (event: MouseEvent, d: Block): void => {
-    console.log('🔵 _blockUpdate called!', { blockId: d?.id, blockTime: d?.time, event });
-
     const ele = document.getElementById(`left-arc-${d.id}`) as SVGGraphicsElement | null;
-    if (!ele) {
-      console.log('❌ Could not find left-arc element for block', d?.id);
-      return;
-    }
-    console.log('✅ Found left-arc element', ele);
+    if (!ele) return;
 
     const active = Boolean(+ele.getAttribute('active')!);
-    console.log('📊 Current active state:', active, '-> will become:', !active);
     ele.setAttribute('active', String(+!active));
     const bbox = ele.getBBox();
-    console.log('📊 BBox:', { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height });
 
-    const filteredRefs = this.data.reference?.filter(e => String(e.year) === String(d.time)) || [];
-    console.log('📊 References for block', d.time, ':', filteredRefs.length, 'items');
     const supplement = {
       nodeColorScale: this.nodeColorScale,
-      reference: filteredRefs,
+      reference: this.data.reference?.filter(e => String(e.year) === String(d.time)) || [],
     };
 
     const moveX = d.moveX;
-    console.log('📊 moveX:', moveX, 'BAND_WIDTH:', this._BAND_WIDTH);
-
     const actor = active
       ? new Collapser(d, bbox.x, this._BAND_WIDTH, this.brushComponent)
       : new Expander(d, bbox.x, this._BAND_WIDTH, this.brushComponent, supplement, this.config.content, this._EGO);
 
-    console.log('📊 Created actor:', active ? 'Collapser' : 'Expander');
-
     this.actors[d.id] = actor;
     const currWidth = +this.chartContainer.node()!.getAttribute('width')!;
-    console.log('📊 Chart width:', currWidth, '-> will become:', active ? currWidth - moveX : currWidth + moveX);
     this.chartContainer.attr('width', active ? currWidth - moveX : currWidth + moveX);
-
-    console.log('📊 Calling actor.act()...');
     actor.act();
-    console.log('📊 actor.act() completed');
 
     if (active) delete this.actors[d.id];
     this.onBlockExpand?.(d.id, !active);
@@ -945,11 +895,6 @@ export class SpreadLinesVisualizer {
 
     const timeContainer = d3.select('#time-container') as any;
     timeContainer.call(brush).on('dblclick', dblclicked);
-
-    // DEBUG: Log clicks on the brush overlay
-    timeContainer.select('.overlay').on('click', (event: MouseEvent) => {
-      console.log('🔵 Brush overlay clicked!', { x: event.offsetX, y: event.offsetY });
-    });
   }
 
   // ============================================
