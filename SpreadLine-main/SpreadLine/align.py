@@ -88,7 +88,7 @@ def _compute_rewards(liner, orderedEntities, orderedIdleEntities):
                 # straight(l_i, r_j), the maximum number of staight lines we can get from these two sessions
                 #if cIdx == 4:
                 #    print('yo', currSessionEntIds, nextSessionEntIds, np.in1d(currSessionEntIds, nextSessionEntIds))
-                num_straight_lines = np.in1d(currSessionEntIds, nextSessionEntIds).sum()
+                num_straight_lines = np.isin(currSessionEntIds, nextSessionEntIds).sum()
                 reward += num_straight_lines
                 # similarity of the relative order
                 compatibility = ALPHA * (1 - np.abs(
