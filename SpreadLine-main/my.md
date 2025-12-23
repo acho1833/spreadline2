@@ -198,3 +198,23 @@ I need you to make the following changes and create app/design8 for documentatio
 - for the box that has been expanded. it's not showing the label and there's links arrows which doesn't need to be.  Compare with y1.png and y2.png.  Research why by comparing the code from SpreadLine directory.  It should match with the react version
 
 Ultrathink the solution.  Make it look exactly same as screenshot y1.png and make the d3 code as similar as possible.
+
+
+-----------------------
+
+I need you to read https://reimagined-spoon-jj45xv6j7jjpcj6w6-3000.app.github.dev/react-design11 and https://reimagined-spoon-jj45xv6j7jjpcj6w6-3000.app.github.dev/react-design11/demo.
+
+
+This is trying to convert this visualization https://reimagined-spoon-jj45xv6j7jjpcj6w6-5173.app.github.dev to React Component.  The source code for that is SpreadLine and it's using D3.js.
+
+React component have already been created at app/react-desgin11 and now I need help converting python to node for the backend.  python code is located at SpreadLine-main. Fully analyze the code and understand it.
+
+I need you to create app/node-design1 which contains all the information from react-design11 and react-design11/demo. put all the backend code at app/node-design1/backend.
+As a first phase, try to emulate exactly what python is doing and transform to node.js using typescript. make sure to use types as much as possible.
+
+Also, I want you to explain how the data is generated.  Figure out what the original data is, show it, explain it.  Then show what python transformed it into and explain it.  on the frontend, it will fetch the data through the api.  use next.js app router api.
+
+Ultrathink it.  You are the greatest typescript developer who can tackle converting python code to node.js with typescript.  Explain the architecture in the documentation.  The documentation must be complete from end to end that is easily understandable with lots of visualization.  It must be comprenhensive.  Remember to create a demo at app/node-design1/demo  
+
+I can't wait to see it and make sure the code quality is excellent and verify that it works. let me know if you have any questions.
+
