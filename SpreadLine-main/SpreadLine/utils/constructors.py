@@ -68,10 +68,10 @@ def _order_within(constraints: list[tuple], entityColor: dict, ascending: bool=T
     counter = 0
     for weight, group in grouped_entities:
         entities = _get_entities(group)
-        # Here we sort the entities further by their categories
-        entities.sort(key=lambda x: entityColor.get(x, ''))
+        # Here we sort the entities further by their categories, then by name for deterministic ordering
+        entities.sort(key=lambda x: (entityColor.get(x, ''), x))
         if counter % 2 == 1: entities.reverse()
-        result[weight] = entities 
+        result[weight] = entities
         counter += 1
         sortedEntities.extend(result[weight])
     return result, sortedEntities

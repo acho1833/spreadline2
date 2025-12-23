@@ -213,7 +213,11 @@ def _construct_author_network(ego, affiliation_remap, relationsPath = '../../cas
                 continue
             newGroup = list(group)
             toBeReverse = False if idx in [0, 1] else True
-            newGroup.sort(key=lambda x: network.loc[(network['source'] == x) | (network['target'] == x), :]['id'].nunique(), reverse=toBeReverse)
+            # Sort by paper count, then by name for deterministic ordering
+            # key = (count, name), reverse = toBeReverse gives:
+            #   toBeReverse=False: ascending count, ascending name
+            #   toBeReverse=True: descending count, descending name
+            newGroup.sort(key=lambda x: (network.loc[(network['source'] == x) | (network['target'] == x), :]['id'].nunique(), x), reverse=toBeReverse)
             newGroups.append(newGroup)
         groupAssign[key] = newGroups
 
