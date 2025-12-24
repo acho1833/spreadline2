@@ -345,3 +345,200 @@ while testing and you can't figure out why the value is different than feel free
 
 Ultrathink and you can do this!
 
+---------------------------------------------------------------------------
+
+use fullstack-development agent to do the following task
+
+I am now at final phase of the design document.  The goal of the task is to create an Technical Design Document (TDD) that captures end-to-end details for a feature we want to implement
+
+I already have the frontend code at app/frontend3 and the backend is at app/api/nodeFetchSpreadLine4.  I want you to fully review and analytic code to complete understanding. if you want you can put trace logs and run the code if you are not clear.  I need you to understand 100%.
+
+The source code is the single source of truth. Do not invent components, APIs, or flows that are not evident in the code. If something is unclear or missing, explicitly state it as an assumption or an open question. Ask questions if you are not clear.
+
+The only piece that are missing is that we will have another backend that will handle getting the source data.  Currently, it's getting from various CSV files but it will be in another API that is different server.  You do not need to implement design for that.  I only want you to create API contract on what the request and response should be with clear technical explanations.  Assume this would be external API but we have control over the API contract and what data should be returned.  Explain how SpreadLine backend should parse and ingest to current code.
+
+There is already design document at app/frontend2/page.tsx or at https://reimagined-spoon-jj45xv6j7jjpcj6w6-3000.app.github.dev/frontend2 so I want you to extend this and include the API contract information as well.
+
+## Objectives
+
+Generate a **formal Technical Design Document** that captures the end-to-end design of this system or feature, including:
+
+## 1. Overview
+## 2. Architecture
+## 3. Components
+### 3.1 Frontend
+### 3.2 Backend
+### 3.3 External Services
+## 4. API Design
+## 5. Data Models
+## 6. Core Flows
+## 7. Error Handling & Edge Cases
+## 8. Non-Functional Requirements
+## 9. Dependencies
+## 10. Assumptions & Open Questions
+
+For each section:
+- Reference concrete files, modules, classes, or functions where applicable.
+- Be explicit and precise.
+- Use bullet points where helpful.
+
+add additional information that you think is useful.  make the documentation to be interactive to understand better as well. not sure which part can be interactive but anywhere it can then do it.  be creative and include many visualizations like sequence diagram and such.
+
+
+
+------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You are a senior full-stack staff engineer and systems architect.
+
+Your task is to generate a **Technical Design Document (TDD)** for the **SpreadLine feature**, based strictly on the provided source code.
+
+The source code is the single source of truth. Do not invent components, APIs, or flows that are not evident in the code. If something is unclear or missing, explicitly list it as an assumption or an open question.
+
+You must NOT modify the code. You cannot execute the repository directly — if runtime behavior is unclear, ask me for logs or outputs.
+
+---
+
+## Feature Focus
+
+The feature being designed and documented is **SpreadLine**.
+
+All analysis and documentation should focus on:
+- How SpreadLine works
+- How SpreadLine is structured across frontend and backend
+- How SpreadLine ingests, processes, and visualizes data
+- What contracts and flows SpreadLine requires
+
+---
+
+## Scope
+
+Source of truth:
+
+Frontend: app/frontend3  
+Backend: app/api/nodeFetchSpreadLine4  
+
+There is an additional external backend that will replace the current CSV data source used by SpreadLine. You must:
+
+- NOT design or implement that backend
+- ONLY define the API contract for it (request, response, error formats, semantics)
+- Explain how the existing SpreadLine backend should parse and ingest its responses
+
+We control the external API contract.
+
+There is an existing design document at:
+- app/frontend2/page.tsx
+- https://reimagined-spoon-jj45xv6j7jjpcj6w6-3000.app.github.dev/frontend2
+
+You should extend and incorporate that design.
+
+---
+
+## Objectives
+
+Generate a **formal Technical Design Document** covering:
+
+1. Overview  
+2. Architecture  
+3. Components  
+   - 3.1 Frontend  
+   - 3.2 Backend  
+   - 3.3 External Services  
+4. API Design  
+5. Data Models  
+6. Core Flows  
+7. Error Handling & Edge Cases  
+8. Non-Functional Requirements  
+9. Dependencies  
+10. Assumptions & Open Questions  
+
+For each section:
+- Reference concrete files, modules, classes, or functions
+- Be explicit and precise
+- Use bullet points where helpful
+
+---
+
+## Visualizations & Interactivity
+
+Include:
+- Mermaid diagrams for architecture and sequences.  Make sure that visualizations are visible and test it.
+- A table of contents with anchor links
+- Cross-references between sections (e.g., “see §4.2”)
+
+Be creative, but keep everything technically rigorous and accurate.
+
+---
+
+## Output Format
+
+Use this exact structure:
+
+# Technical Design Document — SpreadLine
+
+## Table of Contents
+## 1. Overview
+## 2. Architecture
+## 3. Components
+### 3.1 Frontend
+### 3.2 Backend
+### 3.3 External Services
+## 4. API Design
+## 5. Data Models
+## 6. Core Flows
+## 7. Error Handling & Edge Cases
+## 8. Non-Functional Requirements
+## 9. Dependencies
+## 10. Assumptions & Open Questions
+
+Ultrathink it and I want you to create this documentation at app/spreadline-design1/page.tsx
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------
+> it's time for v4 at app/spreadline-design4 I notice that you used the screenshot from screenshot folder.  in there i also included error screenshot and you used that.  so i deleted all 
+error screenshot and put only the actual screenshot now.  can you use this to improve the visualization? 
+- The numbering in Anatomy of SpreadLine is not in correct location 
+- explain the block expansion purpose. it's currently showing author nodes and it seems the higher the citations the more centered it is.  double check this.  once you understand then 
+explain what that is and the purpose and how it helps the user to understand
+- you can remove Non-Functional Requirements
+
+Ultrathink it and create the next version

@@ -26,6 +26,7 @@ export function useSpreadLineData(url: string, initialData?: SpreadLineData) {
     },
     // Use initialData if provided (for mock data scenarios)
     initialData: initialData,
+    
     // Don't refetch on window focus for this visualization
     refetchOnWindowFocus: false,
     // Keep data in cache for 5 minutes
