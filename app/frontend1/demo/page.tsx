@@ -62,7 +62,7 @@ function authorContentCustomize(
     .attr('font-size', '.5rem')
     .style('text-anchor', 'middle')
     .attr('transform', (d: { posX: number }) => `translate(${+currX + _compute_embedding(d.posX, moveX)}, ${topPosY})`)
-    .call(wrap as Parameters<typeof wrap>[0], moveX)
+    .call(wrap as any, moveX)
     .on('mouseover', function() {
       d3.select(this).style('fill', '#CB1B45').classed('stroked-text', true).style('font-weight', 'bold').raise();
     })
