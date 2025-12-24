@@ -26,9 +26,25 @@ def compacting(liner, orderedEntities, orderedSessions, sessionAlignTable):
         heightTable = _compute_session_height_line(liner, slots, slotsInEntities, egoSlotIdx, through=THROUGH)
     sideTable = build_side_table(liner, heightTable)
 
+    # TRACE: Log height values before normalization
+    print("\n=== COMPACT TRACE ===")
+    print(f"Focus mode: {focus}")
+    print(f"Ego index: {liner.egoIdx}")
+    print(f"Ego name: {liner.entities_names[liner.egoIdx]}")
+    print(f"HeightTable shape: {heightTable.shape}")
+    print(f"Ego raw heights (before offset): {heightTable[liner.egoIdx, :]}")
+    print(f"Min height (nanmin): {np.nanmin(heightTable)}")
+    print(f"Max height (nanmax): {np.nanmax(heightTable)}")
+
     minOffset = np.abs(np.nanmin(heightTable))
+    print(f"MinOffset: {minOffset}")
+
     heightTable = heightTable + minOffset
     heightTable[np.isnan(heightTable)] = -1
+
+    print(f"Ego normalized heights: {heightTable[liner.egoIdx, :]}")
+    print(f"Height extents after normalization: [{np.min(heightTable[heightTable >= 0])}, {np.max(heightTable)}]")
+    print("=== END COMPACT TRACE ===\n")
 
     egoUniqueHeight = np.unique(heightTable[liner.egoIdx, :])
     assert len(egoUniqueHeight) == 1, 'Ego should only have one height'
@@ -607,60 +623,26 @@ def _compute_session_height_line(liner, slots: np.ndarray, slotsInEntities: np.n
                 order = orderedOthers.tolist().index(rIdx)
                 # If it is below, we only care who is below him
                 restEntities = orderedOthers[order+1:] if np.sign(height) == 1 else orderedOthers[:order][::-1]
-                #restHeights = otherHeights[order+1:] if np.sign(height) == 1 else otherHeights[:order][::-1]
                 restEntities, result = _assign_nonidle_entity(rIdx, cIdx, height, curr, referenceTable[:, cIdx], restEntities, np.sign(height))
                 # No change, so we don't need to update block range
-                if len(result) == 0: 
-                    outcome = 'nonidle cannot be assigned'
-                    status = 'did not change'
-                    #print(names[rIdx], label, 'nonidle cannot be assigned')
-                    continue
-                #print([names[each] for each in restEntities], result)
+                if len(result) == 0: continue
                 heightTable[restEntities, cIdx] = result
-                outcome = 'nonidle assigned'
-                status = 'changed'
-                #print(names[rIdx], label, 'nonidle assigned')
             else: # idle sessions
                 idleDealt[cIdx][rIdx] = True
-                SQUEEZE_LINE = 2 #1.75
-                # Minimum distance we want it to have from other entities
-                assumedDifference = SQUEEZE_LINE # DISTANCE_LINE
-                # Add this so that we can capture those that are out of range but did not have enough distance to the assignment
+                SQUEEZE_LINE = 2
+                assumedDifference = SQUEEZE_LINE
                 detectRange = otherHeights + SQUEEZE_LINE*np.sign(height)
-                #print([names[each] for each in orderedOthers], detectRange, height, names[rIdx], label)
                 toBeMoved = (detectRange > height) if np.sign(height) == 1 else (detectRange < height)
                 hasContactNodes = [each for each in orderedOthers[toBeMoved] if (presenceTable[each, cIdx] == 1 or heightTable[each, cIdx] == height)]
-                # We don't need to worry about the assignment because either no one gets affected or only idle sessions are affected.
-                #print(sum(toBeMoved), hasContactNodes)
-                #TODO: it feels like there is bug here?
-                if sum(toBeMoved) == 0 or len(hasContactNodes) == 0: 
-                    outcome = 'idle assignment has no effect'
-                    status = 'no effect'
-                    #print(names[rIdx], label, 'idle assignment has no effect')
+                if sum(toBeMoved) == 0 or len(hasContactNodes) == 0:
                     heightTable[rIdx, cIdx] = height
-                    continue 
-                toBeMovedEntities = [names[each] for each in orderedOthers[toBeMoved]]
-                contactEntities = [names[each] for each in hasContactNodes]
-                #print(names[rIdx], label, 'idle can affect', toBeMovedEntities, 'where there are', contactEntities)
+                    continue
 
                 restEntities, result, status = _assign_idle_entity(cIdx, rIdx, height, assumedDifference, orderedOthers, toBeMoved, np.sign(height))
                 if len(result) == 0: continue
-                #print('before', heightTable[rIdx, cIdx], heightTable[restEntities, cIdx], [names[each] for each in restEntities])
-                #heightTable[rIdx, cIdx] = height
-                #print(result, height)
                 heightTable[restEntities, cIdx] = height + result
-                #print(names[rIdx], label, 'idle assigned')
-                outcome = 'idle assigned'
-            if DEBUG:
-                newHeights = heightTable[~np.isnan(heightTable[:, cIdx]), cIdx].copy()
-                newHeights = np.sort(newHeights)
-                for idx, each in enumerate(newHeights):
-                    if idx == 0: continue
-                    if abs(each - newHeights[idx-1]) < 1.75:
-                        print('ERROR', names[rIdx], label, each, newHeights[idx-1], outcome, status)
-                        break
     #TODO: we can smooth this
-    
+
     return heightTable
 
 

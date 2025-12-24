@@ -3,14 +3,14 @@
     "step": 1,
     "name": "LOAD_CSV_FILES",
     "description": "Loading all required CSV files for Jeffrey Heer's network",
-    "timestamp": "2025-12-23T19:52:38.977346",
+    "timestamp": "2025-12-24T14:24:23.210231",
     "shape": "4 CSV files"
   },
   {
     "step": 2,
     "name": "LOAD_RELATIONS",
     "description": "Loaded relations.csv - contains co-authorship relationships",
-    "timestamp": "2025-12-23T19:52:38.991465",
+    "timestamp": "2025-12-24T14:24:23.227436",
     "shape": "Shape: (7730, 7)",
     "sample_data": [
       {
@@ -46,7 +46,7 @@
     "step": 3,
     "name": "LOAD_ENTITIES",
     "description": "Loaded entities.csv - contains author affiliations",
-    "timestamp": "2025-12-23T19:52:39.003438",
+    "timestamp": "2025-12-24T14:24:23.239133",
     "shape": "Shape: (9978, 4)",
     "sample_data": [
       {
@@ -73,7 +73,7 @@
     "step": 4,
     "name": "LOAD_CITATIONS",
     "description": "Loaded citations.csv - contains citation counts per paper",
-    "timestamp": "2025-12-23T19:52:39.017294",
+    "timestamp": "2025-12-24T14:24:23.256822",
     "shape": "Shape: (10139, 5)",
     "sample_data": [
       {
@@ -103,7 +103,7 @@
     "step": 5,
     "name": "LOAD_CONTENT_LAYOUT",
     "description": "Loaded Heer/content.csv - contains precomputed 2D positions for authors",
-    "timestamp": "2025-12-23T19:52:39.018958",
+    "timestamp": "2025-12-24T14:24:23.258594",
     "shape": "Shape: (427, 4)",
     "sample_data": [
       {
@@ -130,13 +130,13 @@
     "step": 6,
     "name": "CONSTRUCT_AUTHOR_NETWORK_START",
     "description": "Starting egocentric network construction for Jeffrey Heer",
-    "timestamp": "2025-12-23T19:52:39.019130"
+    "timestamp": "2025-12-24T14:24:23.258649"
   },
   {
     "step": 7,
     "name": "CONSTRUCT_EGOCENTRIC_NETWORK",
     "description": "Constructed 2-hop egocentric network centered on Jeffrey Heer",
-    "timestamp": "2025-12-23T19:52:40.968049",
+    "timestamp": "2025-12-24T14:24:25.971083",
     "shape": "Network shape: (365, 7)",
     "sample_data": {
       "network_sample": [
@@ -695,13 +695,13 @@
     "step": 8,
     "name": "INITIALIZE_SPREADLINE",
     "description": "Creating SpreadLine instance and starting the pipeline",
-    "timestamp": "2025-12-23T19:52:40.969088"
+    "timestamp": "2025-12-24T14:24:25.971819"
   },
   {
     "step": 9,
     "name": "LOAD_TOPOLOGY",
     "description": "Loading network topology into SpreadLine",
-    "timestamp": "2025-12-23T19:52:40.969948",
+    "timestamp": "2025-12-24T14:24:25.973018",
     "sample_data": {
       "config": {
         "source": "source",
@@ -715,7 +715,7 @@
     "step": 10,
     "name": "LOAD_LINE_COLORS",
     "description": "Loading entity line colors (internal vs external collaborators)",
-    "timestamp": "2025-12-23T19:52:40.971309",
+    "timestamp": "2025-12-24T14:24:25.979460",
     "sample_data": {
       "sample_colors": {
         "entity": {
@@ -1181,7 +1181,7 @@
     "step": 11,
     "name": "PREPARE_NODE_CONTEXT",
     "description": "Aggregated citation counts per author per year",
-    "timestamp": "2025-12-23T19:52:41.129850",
+    "timestamp": "2025-12-24T14:24:26.239245",
     "shape": "Shape: (331, 3)",
     "sample_data": [
       {
@@ -1215,14 +1215,14 @@
     "step": 12,
     "name": "LOAD_CONTENT_LAYOUT",
     "description": "Loading 2D spatial layout for contextual positioning",
-    "timestamp": "2025-12-23T19:52:41.130880",
+    "timestamp": "2025-12-24T14:24:26.240402",
     "shape": "Shape: (427, 4)"
   },
   {
     "step": 13,
     "name": "CENTER_ON_EGO",
     "description": "Centering network on ego: Jeffrey Heer",
-    "timestamp": "2025-12-23T19:52:41.132052",
+    "timestamp": "2025-12-24T14:24:26.241558",
     "sample_data": {
       "ego": "Jeffrey Heer",
       "timeDelta": "year",
@@ -1233,7 +1233,7 @@
     "step": 14,
     "name": "POST_CENTER_STATE",
     "description": "After centering - entities and sessions created",
-    "timestamp": "2025-12-23T19:52:41.421245",
+    "timestamp": "2025-12-24T14:24:26.633588",
     "sample_data": {
       "num_entities": 198,
       "num_sessions": 21,
@@ -1255,7 +1255,7 @@
     "step": 15,
     "name": "CONFIGURE",
     "description": "Configuring optimization parameters",
-    "timestamp": "2025-12-23T19:52:41.421372",
+    "timestamp": "2025-12-24T14:24:26.633642",
     "sample_data": {
       "squeezeSameCategory": true,
       "minimize": "wiggles"
@@ -1265,7 +1265,7 @@
     "step": 16,
     "name": "FIT_PIPELINE_START",
     "description": "Starting the 5-phase optimization pipeline",
-    "timestamp": "2025-12-23T19:52:41.421497",
+    "timestamp": "2025-12-24T14:24:26.633665",
     "sample_data": {
       "width": 2800,
       "height": 1000
@@ -1275,37 +1275,37 @@
     "step": 17,
     "name": "PHASE_1_ORDERING",
     "description": "Running crossing reduction algorithm using barycenter heuristic",
-    "timestamp": "2025-12-23T19:52:41.421638"
+    "timestamp": "2025-12-24T14:24:26.633682"
   },
   {
     "step": 18,
     "name": "PHASE_2_ALIGNING",
     "description": "Maximizing straight lines using longest common substring algorithm",
-    "timestamp": "2025-12-23T19:52:41.421708"
+    "timestamp": "2025-12-24T14:24:26.633687"
   },
   {
     "step": 19,
     "name": "PHASE_3_COMPACTING",
     "description": "Minimizing line wiggles or whitespace based on configuration",
-    "timestamp": "2025-12-23T19:52:41.421774"
+    "timestamp": "2025-12-24T14:24:26.633691"
   },
   {
     "step": 20,
     "name": "PHASE_4_CONTEXTUALIZING",
     "description": "Processing attribute-driven layout (PCA/predefined positions)",
-    "timestamp": "2025-12-23T19:52:41.421841"
+    "timestamp": "2025-12-24T14:24:26.633695"
   },
   {
     "step": 21,
     "name": "PHASE_5_RENDERING",
     "description": "Converting to SVG paths and screen coordinates",
-    "timestamp": "2025-12-23T19:52:41.421906"
+    "timestamp": "2025-12-24T14:24:26.633701"
   },
   {
     "step": 22,
     "name": "FIT_PIPELINE_COMPLETE",
     "description": "Optimization pipeline completed successfully",
-    "timestamp": "2025-12-23T19:52:42.401485",
+    "timestamp": "2025-12-24T14:24:27.960459",
     "sample_data": {
       "result_keys": [
         "bandWidth",
@@ -1330,7 +1330,7 @@
     "step": 23,
     "name": "ADD_REFERENCE_DATA",
     "description": "Added reference content and mode metadata",
-    "timestamp": "2025-12-23T19:52:42.403625",
+    "timestamp": "2025-12-24T14:24:27.963786",
     "sample_data": {
       "mode": "author",
       "reference_count": 243
@@ -1340,7 +1340,7 @@
     "step": 24,
     "name": "FINAL_RESULT",
     "description": "Complete endpoint response ready",
-    "timestamp": "2025-12-23T19:52:42.403724",
+    "timestamp": "2025-12-24T14:24:27.963819",
     "sample_data": {
       "result_summary": {
         "ego": "Jeffrey Heer",
