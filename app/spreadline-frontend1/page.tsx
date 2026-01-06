@@ -37,6 +37,11 @@ interface RawDataResponse {
     color: string;
   }[];
   groups: Record<string, string[][]>;
+  nodeContext: {
+    entity: string;
+    time: string;
+    context: number;
+  }[];
   config: {
     timeDelta: string;
     timeFormat: string;
@@ -108,6 +113,15 @@ function SpreadLineFrontendDemo() {
           entity: 'entity',
           color: 'color'
         }, 'line');
+
+        // Load node context (for citation-based node colors)
+        if (data.nodeContext && data.nodeContext.length > 0) {
+          spreadline.load(data.nodeContext, {
+            time: 'time',
+            entity: 'entity',
+            context: 'context'
+          }, 'node');
+        }
 
         // Center on ego
         spreadline.center(

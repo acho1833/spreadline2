@@ -26,6 +26,19 @@ interface EntityRow {
   affiliation: string;
 }
 
+interface CitationRow {
+  paperID: string;
+  year: number;
+  name: string;
+  citationcount: number;
+}
+
+interface NodeContextEntry {
+  entity: string;
+  time: string;
+  context: number;
+}
+
 interface TopologyEntry {
   source: string;
   target: string;
@@ -121,7 +134,7 @@ function constructAuthorNetwork(
   ego: string,
   relations: RelationRow[],
   allEntities: EntityRow[]
-): { topology: TopologyEntry[]; lineColor: LineColorEntry[]; groups: Record<string, string[][]> } {
+): { topology: TopologyEntry[]; lineColor: LineColorEntry[]; groups: Record<string, string[][]>; network: RelationRow[] } {
   // Convert years to strings
   relations = relations.map(r => ({ ...r, year: String(r.year) }));
   allEntities = allEntities.map(e => ({ ...e, year: String(e.year) }));
@@ -305,7 +318,7 @@ function constructAuthorNetwork(
     weight: row.count || 1
   }));
 
-  return { topology, lineColor: lineColorEntries, groups: finalGroups };
+  return { topology, lineColor: lineColorEntries, groups: finalGroups, network };
 }
 
 /**
@@ -337,9 +350,38 @@ export async function GET(request: NextRequest) {
       // Load CSV files
       const relations = await loadCSV<RelationRow>(path.join(basePath, 'relations.csv'));
       const allEntities = await loadCSV<EntityRow>(path.join(basePath, 'entities.csv'));
+      const citations = await loadCSV<CitationRow>(path.join(basePath, 'citations.csv'));
 
       // Construct author network
-      const { topology, lineColor, groups } = constructAuthorNetwork(ego, relations, allEntities);
+      const { topology, lineColor, groups, network } = constructAuthorNetwork(ego, relations, allEntities);
+
+      // Build node context from citations (for node colors)
+      // Use network (which has paper IDs) not topology
+      const papers = [...new Set(network.map(r => r.id))];
+      const frames: NodeContextEntry[] = [];
+
+      for (const paper of papers) {
+        const group = citations.filter(c => c.paperID === paper);
+        for (const row of group) {
+          frames.push({
+            entity: row.name,
+            time: String(row.year),
+            context: row.citationcount
+          });
+        }
+      }
+
+      // Aggregate by entity and time
+      const aggregated: Record<string, NodeContextEntry> = {};
+      for (const frame of frames) {
+        const key = `${frame.entity},${frame.time}`;
+        if (!aggregated[key]) {
+          aggregated[key] = { ...frame };
+        } else {
+          aggregated[key].context += frame.context;
+        }
+      }
+      const nodeContext = Object.values(aggregated);
 
       return NextResponse.json({
         ego,
@@ -347,6 +389,7 @@ export async function GET(request: NextRequest) {
         topology,
         lineColor,
         groups,
+        nodeContext,
         config: {
           timeDelta: 'year',
           timeFormat: '%Y',
