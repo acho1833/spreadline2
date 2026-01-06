@@ -547,11 +547,17 @@ export class SpreadLinesVisualizer {
           });
 
         // Collapse buttons for top 2-hop section
+        // Position at center of top arc (topY from hopPaths)
         container
-          .filter(d => d.hopSections?.top !== null && d.hopSections?.top !== undefined)
+          .filter(d => d.hopSections?.top !== null && d.hopSections?.top !== undefined && d.outline.topHop != null)
           .append('g')
           .attr('class', d => `hop-collapse-group hop-collapse-top-${d.id}`)
-          .attr('transform', d => `translate(${d.points[0]?.posX || 0}, ${d.hopSections!.top!.centerY})`)
+          .attr('transform', d => {
+            const topHop = d.outline.topHop!;
+            const radius = this.data.blockWidth / 2;
+            // Position at center of top semicircle (topY is center, so topY - radius is the very top)
+            return `translate(${d.points[0]?.posX || 0}, ${topHop.topY})`;
+          })
           .each(function(d) {
             const g = d3.select(this);
             const section = d.hopSections!.top!;
@@ -613,11 +619,16 @@ export class SpreadLinesVisualizer {
           });
 
         // Collapse buttons for bottom 2-hop section
+        // Position at center of bottom arc (bottomY from hopPaths)
         container
-          .filter(d => d.hopSections?.bottom !== null && d.hopSections?.bottom !== undefined)
+          .filter(d => d.hopSections?.bottom !== null && d.hopSections?.bottom !== undefined && d.outline.bottomHop != null)
           .append('g')
           .attr('class', d => `hop-collapse-group hop-collapse-bottom-${d.id}`)
-          .attr('transform', d => `translate(${d.points[0]?.posX || 0}, ${d.hopSections!.bottom!.centerY})`)
+          .attr('transform', d => {
+            const bottomHop = d.outline.bottomHop!;
+            // Position at center of bottom semicircle (bottomY is where the arc is centered)
+            return `translate(${d.points[0]?.posX || 0}, ${bottomHop.bottomY})`;
+          })
           .each(function(d) {
             const g = d3.select(this);
             const section = d.hopSections!.bottom!;
@@ -990,10 +1001,16 @@ export class SpreadLinesVisualizer {
 
     const lineHeight = hopPaths.lineHeight;
     const posX = block.points[0]?.posX || 0;
+    const radius = this.data.blockWidth / 2;
 
     // Calculate new position for the collapse group (count circle)
+    // The group is initially positioned at the arc center (topY for top section, bottomY for bottom section)
+    // On collapse:
+    // - Top section: topY moves down by lineHeight, so new position is topY + lineHeight
+    // - Bottom section: bottomY moves up by lineHeight, so new position is bottomY - lineHeight
     const collapseGroup = d3.select(`.hop-collapse-${section}-${blockId}`);
-    const newY = section === 'top' ? hopPaths.mainY : hopPaths.mainY;
+    const currentY = section === 'top' ? hopPaths.topY : hopPaths.bottomY;
+    const newY = section === 'top' ? currentY + lineHeight : currentY - lineHeight;
 
     // Animate the collapse group to new position
     collapseGroup
@@ -1047,9 +1064,20 @@ export class SpreadLinesVisualizer {
         });
     });
 
-    // 3. Hide storylines connected to these nodes
+    // 3. Hide storylines and markers connected to these nodes
     hopSection.names.forEach(name => {
-      d3.selectAll(`.path-movable[name="${name}"], .symbol-movable[name="${name}"]`)
+      // Hide storyline paths
+      d3.selectAll(`.path-movable[name="${name}"]`)
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .style('opacity', 0)
+        .on('end', function() {
+          d3.select(this).style('visibility', 'hidden');
+        });
+
+      // Hide entry/exit markers (triangles) - they're in .marks containers
+      d3.selectAll(`.marks[name="${name}"]`)
         .transition()
         .duration(duration)
         .ease(ease)
@@ -1143,8 +1171,9 @@ export class SpreadLinesVisualizer {
     const posX = block.points[0]?.posX || 0;
 
     // Restore collapse group to original position
+    // Original position is at the arc center (topY for top section, bottomY for bottom section)
     const collapseGroup = d3.select(`.hop-collapse-${section}-${blockId}`);
-    const originalY = hopSection.centerY;
+    const originalY = section === 'top' ? hopPaths.topY : hopPaths.bottomY;
 
     collapseGroup
       .transition()
@@ -1195,12 +1224,21 @@ export class SpreadLinesVisualizer {
         .style('opacity', 1);
     });
 
-    // 3. Show storylines connected to these nodes (if not filtered out)
+    // 3. Show storylines and markers connected to these nodes (if not filtered out)
     hopSection.names.forEach(name => {
       // Only show if not hidden by filter
       if (this.visibility[name] === false) return;
 
-      d3.selectAll(`.path-movable[name="${name}"], .symbol-movable[name="${name}"]`)
+      // Show storyline paths
+      d3.selectAll(`.path-movable[name="${name}"]`)
+        .style('visibility', 'visible')
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .style('opacity', 1);
+
+      // Show entry/exit markers (triangles)
+      d3.selectAll(`.marks[name="${name}"]`)
         .style('visibility', 'visible')
         .transition()
         .duration(duration)
