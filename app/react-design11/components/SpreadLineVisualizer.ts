@@ -318,21 +318,13 @@ export class SpreadLinesVisualizer {
           .attr('class', d => (d.name === this._EGO ? 'storyline-ego' : 'storyline-alter'))
           .style('cursor', d => (d.name === this._EGO ? 'default' : 'pointer'));
 
-        // Path segments
+        // Single continuous path per storyline (renders behind pills)
         container
-          .append('g')
+          .append('path')
           .attr('stroke', d => d.color)
           .attr('name', d => d.name)
-          .attr('class', d => `line-${d.id} line-filter`)
-          .selectAll('path')
-          .data(d => d.lines)
-          .join('path')
-          .attr('d', e => e)
-          .attr('name', function (this: d3.BaseType) {
-            const elem = this as SVGPathElement;
-            return (elem.parentNode as SVGElement)?.getAttribute('name');
-          })
-          .attr('class', 'movable path-movable')
+          .attr('class', d => `line-${d.id} line-filter movable path-movable`)
+          .attr('d', d => d.lines.join(' '))
           .attr('transform', 'translate(0, 0)');
 
         // Entry/exit markers
@@ -413,16 +405,18 @@ export class SpreadLinesVisualizer {
             const g = d3.select(this);
             const topHop = d.outline.topHop!;
 
-            // Top arc (semicircle at top)
+            // Top arc (semicircle at top) - fill:none so storylines show through
             g.append('path')
               .attr('id', `top-hop-top-arc-left-${d.id}`)
               .attr('class', 'movable station-arcs top-hop-arc')
               .attr('d', topHop.topArcLeft)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)');
             g.append('path')
               .attr('id', `top-hop-top-arc-right-${d.id}`)
               .attr('class', 'movable station-arcs top-hop-arc')
               .attr('d', topHop.topArcRight)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)');
 
             // Line (vertical portion) - this is what we animate
@@ -430,6 +424,7 @@ export class SpreadLinesVisualizer {
               .attr('id', `top-hop-line-left-${d.id}`)
               .attr('class', 'movable station-arcs top-hop-line')
               .attr('d', topHop.lineLeft)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)')
               .attr('data-original-d', topHop.lineLeft)
               .attr('data-line-height', topHop.lineHeight);
@@ -437,20 +432,23 @@ export class SpreadLinesVisualizer {
               .attr('id', `top-hop-line-right-${d.id}`)
               .attr('class', 'movable station-arcs top-hop-line')
               .attr('d', topHop.lineRight)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)')
               .attr('data-original-d', topHop.lineRight)
               .attr('data-line-height', topHop.lineHeight);
 
-            // Bottom arc (transition to main)
+            // Bottom arc (transition to main) - fill:none so storylines show through
             g.append('path')
               .attr('id', `top-hop-bottom-arc-left-${d.id}`)
               .attr('class', 'movable station-arcs top-hop-arc')
               .attr('d', topHop.bottomArcLeft)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)');
             g.append('path')
               .attr('id', `top-hop-bottom-arc-right-${d.id}`)
               .attr('class', 'movable station-arcs top-hop-arc')
               .attr('d', topHop.bottomArcRight)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)');
           });
 
@@ -461,16 +459,18 @@ export class SpreadLinesVisualizer {
             const g = d3.select(this);
             const bottomHop = d.outline.bottomHop!;
 
-            // Top arc (transition from main)
+            // Top arc (transition from main) - fill:none so storylines show through
             g.append('path')
               .attr('id', `bottom-hop-top-arc-left-${d.id}`)
               .attr('class', 'movable station-arcs bottom-hop-arc')
               .attr('d', bottomHop.topArcLeft)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)');
             g.append('path')
               .attr('id', `bottom-hop-top-arc-right-${d.id}`)
               .attr('class', 'movable station-arcs bottom-hop-arc')
               .attr('d', bottomHop.topArcRight)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)');
 
             // Line (vertical portion) - this is what we animate
@@ -478,6 +478,7 @@ export class SpreadLinesVisualizer {
               .attr('id', `bottom-hop-line-left-${d.id}`)
               .attr('class', 'movable station-arcs bottom-hop-line')
               .attr('d', bottomHop.lineLeft)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)')
               .attr('data-original-d', bottomHop.lineLeft)
               .attr('data-line-height', bottomHop.lineHeight);
@@ -485,20 +486,23 @@ export class SpreadLinesVisualizer {
               .attr('id', `bottom-hop-line-right-${d.id}`)
               .attr('class', 'movable station-arcs bottom-hop-line')
               .attr('d', bottomHop.lineRight)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)')
               .attr('data-original-d', bottomHop.lineRight)
               .attr('data-line-height', bottomHop.lineHeight);
 
-            // Bottom arc (semicircle at bottom)
+            // Bottom arc (semicircle at bottom) - fill:none so storylines show through
             g.append('path')
               .attr('id', `bottom-hop-bottom-arc-left-${d.id}`)
               .attr('class', 'movable station-arcs bottom-hop-arc')
               .attr('d', bottomHop.bottomArcLeft)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)');
             g.append('path')
               .attr('id', `bottom-hop-bottom-arc-right-${d.id}`)
               .attr('class', 'movable station-arcs bottom-hop-arc')
               .attr('d', bottomHop.bottomArcRight)
+              .attr('fill', 'none')
               .attr('transform', 'translate(0, 0)');
           });
 
@@ -1175,12 +1179,12 @@ export class SpreadLinesVisualizer {
 
     // 4. Animate the hop section paths
     const prefix = section === 'top' ? 'top-hop' : 'bottom-hop';
-    const translateY = section === 'top' ? lineHeight : -lineHeight;
 
-    // Animate line paths to 0 height (same start and end Y)
-    const startY = hopPaths.topY;
-    const collapsedLineLeft = `M${posX - this.data.blockWidth / 2},${startY} L${posX - this.data.blockWidth / 2},${startY}`;
-    const collapsedLineRight = `M${posX + this.data.blockWidth / 2},${startY} L${posX + this.data.blockWidth / 2},${startY}`;
+    // For top section: collapse to bottomY (shrink downward toward ego)
+    // For bottom section: collapse to topY (shrink upward toward ego)
+    const collapseY = section === 'top' ? hopPaths.bottomY : hopPaths.topY;
+    const collapsedLineLeft = `M${posX - this.data.blockWidth / 2},${collapseY} L${posX - this.data.blockWidth / 2},${collapseY}`;
+    const collapsedLineRight = `M${posX + this.data.blockWidth / 2},${collapseY} L${posX + this.data.blockWidth / 2},${collapseY}`;
 
     d3.select(`#${prefix}-line-left-${blockId}`)
       .transition()
@@ -1194,9 +1198,9 @@ export class SpreadLinesVisualizer {
       .ease(ease)
       .attr('d', collapsedLineRight);
 
-    // Translate the top arc and bottom arc to meet at the collapsed position
+    // Translate arcs to meet at the collapsed position
     if (section === 'top') {
-      // Top section: move top arc down, bottom arc stays (or also moves)
+      // Top section: move top arc DOWN to bottomY (shrink toward ego)
       d3.select(`#${prefix}-top-arc-left-${blockId}`)
         .transition()
         .duration(duration)
@@ -1211,7 +1215,7 @@ export class SpreadLinesVisualizer {
 
       // Bottom arc stays at main position
     } else {
-      // Bottom section: move bottom arc up, top arc stays
+      // Bottom section: move bottom arc UP to topY (shrink toward ego)
       d3.select(`#${prefix}-bottom-arc-left-${blockId}`)
         .transition()
         .duration(duration)

@@ -249,7 +249,7 @@ export function createStyleElementFromCSS(): SVGStyleElement {
 
     /* Station arcs (blocks) - original light theme */
     .station-arcs {
-      fill: #ffffff;
+      fill: none;
       stroke-width: 4px;
       cursor: pointer;
       stroke: #424242;
