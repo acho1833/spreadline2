@@ -547,7 +547,7 @@ export class SpreadLinesVisualizer {
           });
 
         // Collapse buttons for top 2-hop section
-        // Position at center of top arc (topY from hopPaths)
+        // Position at exterior (top of semicircle: topY - radius)
         container
           .filter(d => d.hopSections?.top !== null && d.hopSections?.top !== undefined && d.outline.topHop != null)
           .append('g')
@@ -555,14 +555,14 @@ export class SpreadLinesVisualizer {
           .attr('transform', d => {
             const topHop = d.outline.topHop!;
             const radius = this.data.blockWidth / 2;
-            // Position at center of top semicircle (topY is center, so topY - radius is the very top)
-            return `translate(${d.points[0]?.posX || 0}, ${topHop.topY})`;
+            // Position at top of semicircle (exterior)
+            return `translate(${d.points[0]?.posX || 0}, ${topHop.topY - radius})`;
           })
           .each(function(d) {
             const g = d3.select(this);
             const section = d.hopSections!.top!;
 
-            // Collapse button (visible when expanded)
+            // Collapse button [-] (visible when expanded)
             g.append('rect')
               .attr('class', `hop-collapse-btn hop-collapse-btn-top-${d.id}`)
               .attr('x', -10)
@@ -586,11 +586,37 @@ export class SpreadLinesVisualizer {
               .style('user-select', 'none')
               .text('−');
 
+            // Expand button [+] (hidden when expanded, shown when collapsed)
+            g.append('rect')
+              .attr('class', `hop-expand-btn hop-expand-btn-top-${d.id}`)
+              .attr('x', -10)
+              .attr('y', -8)
+              .attr('width', 20)
+              .attr('height', 16)
+              .attr('rx', 3)
+              .attr('fill', '#f0f0f0')
+              .attr('stroke', '#999')
+              .attr('stroke-width', 1)
+              .style('cursor', 'pointer')
+              .style('visibility', 'hidden');
+
+            g.append('text')
+              .attr('class', `hop-expand-btn-text hop-expand-btn-text-top-${d.id}`)
+              .attr('x', 0)
+              .attr('y', 4)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '12px')
+              .attr('fill', '#666')
+              .style('cursor', 'pointer')
+              .style('user-select', 'none')
+              .style('visibility', 'hidden')
+              .text('+');
+
             // Count circle (hidden when expanded, shown when collapsed)
             g.append('circle')
               .attr('class', `hop-count-circle hop-count-circle-top-${d.id}`)
               .attr('cx', 0)
-              .attr('cy', 0)
+              .attr('cy', 20)
               .attr('r', 12)
               .attr('fill', '#e0e0e0')
               .attr('stroke', '#999')
@@ -601,7 +627,7 @@ export class SpreadLinesVisualizer {
             g.append('text')
               .attr('class', `hop-count-text hop-count-text-top-${d.id}`)
               .attr('x', 0)
-              .attr('y', 4)
+              .attr('y', 24)
               .attr('text-anchor', 'middle')
               .attr('font-size', '11px')
               .attr('font-weight', 'bold')
@@ -619,21 +645,22 @@ export class SpreadLinesVisualizer {
           });
 
         // Collapse buttons for bottom 2-hop section
-        // Position at center of bottom arc (bottomY from hopPaths)
+        // Position at exterior (bottom of semicircle: bottomY + radius)
         container
           .filter(d => d.hopSections?.bottom !== null && d.hopSections?.bottom !== undefined && d.outline.bottomHop != null)
           .append('g')
           .attr('class', d => `hop-collapse-group hop-collapse-bottom-${d.id}`)
           .attr('transform', d => {
             const bottomHop = d.outline.bottomHop!;
-            // Position at center of bottom semicircle (bottomY is where the arc is centered)
-            return `translate(${d.points[0]?.posX || 0}, ${bottomHop.bottomY})`;
+            const radius = this.data.blockWidth / 2;
+            // Position at bottom of semicircle (exterior)
+            return `translate(${d.points[0]?.posX || 0}, ${bottomHop.bottomY + radius})`;
           })
           .each(function(d) {
             const g = d3.select(this);
             const section = d.hopSections!.bottom!;
 
-            // Collapse button (visible when expanded)
+            // Collapse button [-] (visible when expanded)
             g.append('rect')
               .attr('class', `hop-collapse-btn hop-collapse-btn-bottom-${d.id}`)
               .attr('x', -10)
@@ -657,11 +684,37 @@ export class SpreadLinesVisualizer {
               .style('user-select', 'none')
               .text('−');
 
+            // Expand button [+] (hidden when expanded, shown when collapsed)
+            g.append('rect')
+              .attr('class', `hop-expand-btn hop-expand-btn-bottom-${d.id}`)
+              .attr('x', -10)
+              .attr('y', -8)
+              .attr('width', 20)
+              .attr('height', 16)
+              .attr('rx', 3)
+              .attr('fill', '#f0f0f0')
+              .attr('stroke', '#999')
+              .attr('stroke-width', 1)
+              .style('cursor', 'pointer')
+              .style('visibility', 'hidden');
+
+            g.append('text')
+              .attr('class', `hop-expand-btn-text hop-expand-btn-text-bottom-${d.id}`)
+              .attr('x', 0)
+              .attr('y', 4)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '12px')
+              .attr('fill', '#666')
+              .style('cursor', 'pointer')
+              .style('user-select', 'none')
+              .style('visibility', 'hidden')
+              .text('+');
+
             // Count circle (hidden when expanded, shown when collapsed)
             g.append('circle')
               .attr('class', `hop-count-circle hop-count-circle-bottom-${d.id}`)
               .attr('cx', 0)
-              .attr('cy', 0)
+              .attr('cy', -20)
               .attr('r', 12)
               .attr('fill', '#e0e0e0')
               .attr('stroke', '#999')
@@ -672,7 +725,7 @@ export class SpreadLinesVisualizer {
             g.append('text')
               .attr('class', `hop-count-text hop-count-text-bottom-${d.id}`)
               .attr('x', 0)
-              .attr('y', 4)
+              .attr('y', -16)
               .attr('text-anchor', 'middle')
               .attr('font-size', '11px')
               .attr('font-weight', 'bold')
@@ -1003,14 +1056,14 @@ export class SpreadLinesVisualizer {
     const posX = block.points[0]?.posX || 0;
     const radius = this.data.blockWidth / 2;
 
-    // Calculate new position for the collapse group (count circle)
-    // The group is initially positioned at the arc center (topY for top section, bottomY for bottom section)
+    // Calculate new position for the collapse group
+    // The group is initially positioned at exterior (topY - radius for top, bottomY + radius for bottom)
     // On collapse:
-    // - Top section: topY moves down by lineHeight, so new position is topY + lineHeight
-    // - Bottom section: bottomY moves up by lineHeight, so new position is bottomY - lineHeight
+    // - Top section: top arc moves down by lineHeight, so new position is (topY - radius) + lineHeight
+    // - Bottom section: bottom arc moves up by lineHeight, so new position is (bottomY + radius) - lineHeight
     const collapseGroup = d3.select(`.hop-collapse-${section}-${blockId}`);
-    const currentY = section === 'top' ? hopPaths.topY : hopPaths.bottomY;
-    const newY = section === 'top' ? currentY + lineHeight : currentY - lineHeight;
+    const originalY = section === 'top' ? hopPaths.topY - radius : hopPaths.bottomY + radius;
+    const newY = section === 'top' ? originalY + lineHeight : originalY - lineHeight;
 
     // Animate the collapse group to new position
     collapseGroup
@@ -1019,7 +1072,7 @@ export class SpreadLinesVisualizer {
       .ease(ease)
       .attr('transform', `translate(${posX}, ${newY})`);
 
-    // 1. Hide collapse button, show count circle
+    // 1. Hide collapse button [-], show expand button [+] and count circle
     d3.select(`.hop-collapse-btn-${section}-${blockId}`)
       .transition()
       .duration(duration / 2)
@@ -1036,6 +1089,24 @@ export class SpreadLinesVisualizer {
         d3.select(this).style('visibility', 'hidden');
       });
 
+    // Show expand button [+]
+    d3.select(`.hop-expand-btn-${section}-${blockId}`)
+      .style('visibility', 'visible')
+      .style('opacity', 0)
+      .transition()
+      .delay(duration / 2)
+      .duration(duration / 2)
+      .style('opacity', 1);
+
+    d3.select(`.hop-expand-btn-text-${section}-${blockId}`)
+      .style('visibility', 'visible')
+      .style('opacity', 0)
+      .transition()
+      .delay(duration / 2)
+      .duration(duration / 2)
+      .style('opacity', 1);
+
+    // Show count circle
     d3.select(`.hop-count-circle-${section}-${blockId}`)
       .style('visibility', 'visible')
       .style('opacity', 0)
@@ -1169,11 +1240,12 @@ export class SpreadLinesVisualizer {
     if (!hopPaths) return;
 
     const posX = block.points[0]?.posX || 0;
+    const radius = this.data.blockWidth / 2;
 
     // Restore collapse group to original position
-    // Original position is at the arc center (topY for top section, bottomY for bottom section)
+    // Original position is at exterior (topY - radius for top, bottomY + radius for bottom)
     const collapseGroup = d3.select(`.hop-collapse-${section}-${blockId}`);
-    const originalY = section === 'top' ? hopPaths.topY : hopPaths.bottomY;
+    const originalY = section === 'top' ? hopPaths.topY - radius : hopPaths.bottomY + radius;
 
     collapseGroup
       .transition()
@@ -1181,7 +1253,23 @@ export class SpreadLinesVisualizer {
       .ease(ease)
       .attr('transform', `translate(${posX}, ${originalY})`);
 
-    // 1. Hide count circle, show collapse button
+    // 1. Hide expand button [+] and count circle, show collapse button [-]
+    d3.select(`.hop-expand-btn-${section}-${blockId}`)
+      .transition()
+      .duration(duration / 2)
+      .style('opacity', 0)
+      .on('end', function() {
+        d3.select(this).style('visibility', 'hidden');
+      });
+
+    d3.select(`.hop-expand-btn-text-${section}-${blockId}`)
+      .transition()
+      .duration(duration / 2)
+      .style('opacity', 0)
+      .on('end', function() {
+        d3.select(this).style('visibility', 'hidden');
+      });
+
     d3.select(`.hop-count-circle-${section}-${blockId}`)
       .transition()
       .duration(duration / 2)
