@@ -140,23 +140,12 @@ function SpreadLineDemo() {
     },
   }), []);
 
-  if (loading) {
+  if (loading || !data) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-gray-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <div className="text-gray-700 text-xl">Loading SpreadLine data...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center p-8 bg-gray-50 rounded-xl border border-red-500">
-          <div className="text-red-600 text-xl mb-2">Error loading data</div>
-          <div className="text-gray-600">{error || 'Unknown error'}</div>
         </div>
       </div>
     );
