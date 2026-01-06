@@ -442,6 +442,15 @@ export interface InlineLabelResult {
   name: string;
 }
 
+export interface HopSectionInfo {
+  nodeCount: number;    // Number of nodes in this section
+  centerY: number;      // Y position for button/count circle
+  nodeIds: number[];    // Node IDs in this section
+  names: string[];      // Entity names in this section
+  minY: number;         // Top Y of this section
+  maxY: number;         // Bottom Y of this section
+}
+
 export interface BlockResult {
   id: number;
   time: string;
@@ -451,6 +460,10 @@ export interface BlockResult {
   points: PointResult[];
   moveX: number;
   topPosY: number;
+  hopSections: {
+    top: HopSectionInfo | null;
+    bottom: HopSectionInfo | null;
+  };
 }
 
 export interface PointResult {

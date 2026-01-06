@@ -21,6 +21,34 @@ export interface Point {
 }
 
 /**
+ * Info about a hop section (top or bottom 2-hop) for collapse UI
+ */
+export interface HopSectionInfo {
+  nodeCount: number;    // Number of nodes in this section
+  centerY: number;      // Y position for button/count circle
+  nodeIds: number[];    // Node IDs in this section
+  names: string[];      // Entity names in this section
+  minY: number;         // Top Y of this section
+  maxY: number;         // Bottom Y of this section
+}
+
+/**
+ * Separate paths for a collapsible 2-hop section
+ */
+export interface HopSectionPaths {
+  topArcLeft: string;
+  topArcRight: string;
+  lineLeft: string;
+  lineRight: string;
+  bottomArcLeft: string;
+  bottomArcRight: string;
+  topY: number;
+  bottomY: number;
+  mainY: number;
+  lineHeight: number;
+}
+
+/**
  * Represents a block (session) at a specific timestep
  */
 export interface Block {
@@ -37,6 +65,12 @@ export interface Block {
     top: string;
     bottom: string;
     button?: string;
+    topHop?: HopSectionPaths | null;
+    bottomHop?: HopSectionPaths | null;
+  };
+  hopSections: {
+    top: HopSectionInfo | null;
+    bottom: HopSectionInfo | null;
   };
 }
 

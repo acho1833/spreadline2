@@ -20,6 +20,7 @@ import {
   Block,
   TimeLabel,
   BrushComponent,
+  HopSectionInfo,
   createDefaultConfig,
 } from './types';
 import {
@@ -54,6 +55,9 @@ export class SpreadLinesVisualizer {
   actors: Record<number, Expander | Collapser> = {};
   force = true;
   nodeColorScale: d3.ScaleThreshold<number, string>;
+
+  // Track collapsed hop sections: blockId -> Set of collapsed sections ('top' | 'bottom')
+  collapsedSections: Map<number, Set<'top' | 'bottom'>> = new Map();
 
   // D3 selections
   chartContainer!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
@@ -385,7 +389,7 @@ export class SpreadLinesVisualizer {
             this._blockUpdate(event, d);
           });
 
-        // Left arc
+        // Main section - Left arc
         container
           .append('path')
           .attr('id', d => `left-arc-${d.id}`)
@@ -394,13 +398,109 @@ export class SpreadLinesVisualizer {
           .attr('transform', 'translate(0, 0)')
           .attr('active', 0);
 
-        // Right arc
+        // Main section - Right arc
         container
           .append('path')
           .attr('id', d => `right-arc-${d.id}`)
           .attr('class', 'movable station-arcs')
           .attr('d', d => d.outline.right)
           .attr('transform', 'translate(0, 0)');
+
+        // Top 2-hop section paths (if exists)
+        container
+          .filter(d => d.outline.topHop != null)
+          .each(function(d) {
+            const g = d3.select(this);
+            const topHop = d.outline.topHop!;
+
+            // Top arc (semicircle at top)
+            g.append('path')
+              .attr('id', `top-hop-top-arc-left-${d.id}`)
+              .attr('class', 'movable station-arcs top-hop-arc')
+              .attr('d', topHop.topArcLeft)
+              .attr('transform', 'translate(0, 0)');
+            g.append('path')
+              .attr('id', `top-hop-top-arc-right-${d.id}`)
+              .attr('class', 'movable station-arcs top-hop-arc')
+              .attr('d', topHop.topArcRight)
+              .attr('transform', 'translate(0, 0)');
+
+            // Line (vertical portion) - this is what we animate
+            g.append('path')
+              .attr('id', `top-hop-line-left-${d.id}`)
+              .attr('class', 'movable station-arcs top-hop-line')
+              .attr('d', topHop.lineLeft)
+              .attr('transform', 'translate(0, 0)')
+              .attr('data-original-d', topHop.lineLeft)
+              .attr('data-line-height', topHop.lineHeight);
+            g.append('path')
+              .attr('id', `top-hop-line-right-${d.id}`)
+              .attr('class', 'movable station-arcs top-hop-line')
+              .attr('d', topHop.lineRight)
+              .attr('transform', 'translate(0, 0)')
+              .attr('data-original-d', topHop.lineRight)
+              .attr('data-line-height', topHop.lineHeight);
+
+            // Bottom arc (transition to main)
+            g.append('path')
+              .attr('id', `top-hop-bottom-arc-left-${d.id}`)
+              .attr('class', 'movable station-arcs top-hop-arc')
+              .attr('d', topHop.bottomArcLeft)
+              .attr('transform', 'translate(0, 0)');
+            g.append('path')
+              .attr('id', `top-hop-bottom-arc-right-${d.id}`)
+              .attr('class', 'movable station-arcs top-hop-arc')
+              .attr('d', topHop.bottomArcRight)
+              .attr('transform', 'translate(0, 0)');
+          });
+
+        // Bottom 2-hop section paths (if exists)
+        container
+          .filter(d => d.outline.bottomHop != null)
+          .each(function(d) {
+            const g = d3.select(this);
+            const bottomHop = d.outline.bottomHop!;
+
+            // Top arc (transition from main)
+            g.append('path')
+              .attr('id', `bottom-hop-top-arc-left-${d.id}`)
+              .attr('class', 'movable station-arcs bottom-hop-arc')
+              .attr('d', bottomHop.topArcLeft)
+              .attr('transform', 'translate(0, 0)');
+            g.append('path')
+              .attr('id', `bottom-hop-top-arc-right-${d.id}`)
+              .attr('class', 'movable station-arcs bottom-hop-arc')
+              .attr('d', bottomHop.topArcRight)
+              .attr('transform', 'translate(0, 0)');
+
+            // Line (vertical portion) - this is what we animate
+            g.append('path')
+              .attr('id', `bottom-hop-line-left-${d.id}`)
+              .attr('class', 'movable station-arcs bottom-hop-line')
+              .attr('d', bottomHop.lineLeft)
+              .attr('transform', 'translate(0, 0)')
+              .attr('data-original-d', bottomHop.lineLeft)
+              .attr('data-line-height', bottomHop.lineHeight);
+            g.append('path')
+              .attr('id', `bottom-hop-line-right-${d.id}`)
+              .attr('class', 'movable station-arcs bottom-hop-line')
+              .attr('d', bottomHop.lineRight)
+              .attr('transform', 'translate(0, 0)')
+              .attr('data-original-d', bottomHop.lineRight)
+              .attr('data-line-height', bottomHop.lineHeight);
+
+            // Bottom arc (semicircle at bottom)
+            g.append('path')
+              .attr('id', `bottom-hop-bottom-arc-left-${d.id}`)
+              .attr('class', 'movable station-arcs bottom-hop-arc')
+              .attr('d', bottomHop.bottomArcLeft)
+              .attr('transform', 'translate(0, 0)');
+            g.append('path')
+              .attr('id', `bottom-hop-bottom-arc-right-${d.id}`)
+              .attr('class', 'movable station-arcs bottom-hop-arc')
+              .attr('d', bottomHop.bottomArcRight)
+              .attr('transform', 'translate(0, 0)');
+          });
 
         // Horizontal bars (hidden until expanded)
         container
@@ -423,7 +523,7 @@ export class SpreadLinesVisualizer {
 
         // Points
         container
-          .selectAll('circle')
+          .selectAll('circle.points')
           .data(d => d.points)
           .join('circle')
           .attr('class', d => `movable points-${d.group} points-${d.name} points`)
@@ -444,6 +544,138 @@ export class SpreadLinesVisualizer {
             if (self.visibility[d.name] === false) return;
             d3.select('#point-tooltip').style('visibility', 'hidden');
             self._lineHoverOut(event, d as unknown as Storyline);
+          });
+
+        // Collapse buttons for top 2-hop section
+        container
+          .filter(d => d.hopSections?.top !== null && d.hopSections?.top !== undefined)
+          .append('g')
+          .attr('class', d => `hop-collapse-group hop-collapse-top-${d.id}`)
+          .attr('transform', d => `translate(${d.points[0]?.posX || 0}, ${d.hopSections!.top!.centerY})`)
+          .each(function(d) {
+            const g = d3.select(this);
+            const section = d.hopSections!.top!;
+
+            // Collapse button (visible when expanded)
+            g.append('rect')
+              .attr('class', `hop-collapse-btn hop-collapse-btn-top-${d.id}`)
+              .attr('x', -10)
+              .attr('y', -8)
+              .attr('width', 20)
+              .attr('height', 16)
+              .attr('rx', 3)
+              .attr('fill', '#f0f0f0')
+              .attr('stroke', '#999')
+              .attr('stroke-width', 1)
+              .style('cursor', 'pointer');
+
+            g.append('text')
+              .attr('class', `hop-collapse-btn-text hop-collapse-btn-text-top-${d.id}`)
+              .attr('x', 0)
+              .attr('y', 4)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '12px')
+              .attr('fill', '#666')
+              .style('cursor', 'pointer')
+              .style('user-select', 'none')
+              .text('−');
+
+            // Count circle (hidden when expanded, shown when collapsed)
+            g.append('circle')
+              .attr('class', `hop-count-circle hop-count-circle-top-${d.id}`)
+              .attr('cx', 0)
+              .attr('cy', 0)
+              .attr('r', 12)
+              .attr('fill', '#e0e0e0')
+              .attr('stroke', '#999')
+              .attr('stroke-width', 1)
+              .style('cursor', 'pointer')
+              .style('visibility', 'hidden');
+
+            g.append('text')
+              .attr('class', `hop-count-text hop-count-text-top-${d.id}`)
+              .attr('x', 0)
+              .attr('y', 4)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '11px')
+              .attr('font-weight', 'bold')
+              .attr('fill', '#555')
+              .style('cursor', 'pointer')
+              .style('user-select', 'none')
+              .style('visibility', 'hidden')
+              .text(section.nodeCount);
+
+            // Click handler for entire group
+            g.on('click', function(event: MouseEvent) {
+              event.stopPropagation();
+              self._toggleHopSection(d.id, 'top');
+            });
+          });
+
+        // Collapse buttons for bottom 2-hop section
+        container
+          .filter(d => d.hopSections?.bottom !== null && d.hopSections?.bottom !== undefined)
+          .append('g')
+          .attr('class', d => `hop-collapse-group hop-collapse-bottom-${d.id}`)
+          .attr('transform', d => `translate(${d.points[0]?.posX || 0}, ${d.hopSections!.bottom!.centerY})`)
+          .each(function(d) {
+            const g = d3.select(this);
+            const section = d.hopSections!.bottom!;
+
+            // Collapse button (visible when expanded)
+            g.append('rect')
+              .attr('class', `hop-collapse-btn hop-collapse-btn-bottom-${d.id}`)
+              .attr('x', -10)
+              .attr('y', -8)
+              .attr('width', 20)
+              .attr('height', 16)
+              .attr('rx', 3)
+              .attr('fill', '#f0f0f0')
+              .attr('stroke', '#999')
+              .attr('stroke-width', 1)
+              .style('cursor', 'pointer');
+
+            g.append('text')
+              .attr('class', `hop-collapse-btn-text hop-collapse-btn-text-bottom-${d.id}`)
+              .attr('x', 0)
+              .attr('y', 4)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '12px')
+              .attr('fill', '#666')
+              .style('cursor', 'pointer')
+              .style('user-select', 'none')
+              .text('−');
+
+            // Count circle (hidden when expanded, shown when collapsed)
+            g.append('circle')
+              .attr('class', `hop-count-circle hop-count-circle-bottom-${d.id}`)
+              .attr('cx', 0)
+              .attr('cy', 0)
+              .attr('r', 12)
+              .attr('fill', '#e0e0e0')
+              .attr('stroke', '#999')
+              .attr('stroke-width', 1)
+              .style('cursor', 'pointer')
+              .style('visibility', 'hidden');
+
+            g.append('text')
+              .attr('class', `hop-count-text hop-count-text-bottom-${d.id}`)
+              .attr('x', 0)
+              .attr('y', 4)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '11px')
+              .attr('font-weight', 'bold')
+              .attr('fill', '#555')
+              .style('cursor', 'pointer')
+              .style('user-select', 'none')
+              .style('visibility', 'hidden')
+              .text(section.nodeCount);
+
+            // Click handler for entire group
+            g.on('click', function(event: MouseEvent) {
+              event.stopPropagation();
+              self._toggleHopSection(d.id, 'bottom');
+            });
           });
 
         return container;
@@ -715,6 +947,321 @@ export class SpreadLinesVisualizer {
     if (active) delete this.actors[d.id];
     this.onBlockExpand?.(d.id, !active);
   };
+
+  /**
+   * Toggle collapse/expand for a hop section (top or bottom 2-hop)
+   */
+  private _toggleHopSection = (blockId: number, section: 'top' | 'bottom'): void => {
+    const block = this.data.blocks.find(b => b.id === blockId);
+    if (!block) return;
+
+    const hopSection = block.hopSections?.[section];
+    if (!hopSection) return;
+
+    // Get or create collapsed set for this block
+    if (!this.collapsedSections.has(blockId)) {
+      this.collapsedSections.set(blockId, new Set());
+    }
+    const collapsed = this.collapsedSections.get(blockId)!;
+    const isCurrentlyCollapsed = collapsed.has(section);
+
+    // Toggle state
+    if (isCurrentlyCollapsed) {
+      collapsed.delete(section);
+      this._expandHopSection(blockId, section, hopSection);
+    } else {
+      collapsed.add(section);
+      this._collapseHopSection(blockId, section, hopSection);
+    }
+  };
+
+  /**
+   * Collapse a hop section with animation - shrinks the pill height
+   * Simple approach: animate line height to 0, translate arcs
+   */
+  private _collapseHopSection(blockId: number, section: 'top' | 'bottom', hopSection: HopSectionInfo): void {
+    const duration = 500;
+    const ease = d3.easeQuadInOut;
+    const block = this.data.blocks.find(b => b.id === blockId);
+    if (!block) return;
+
+    const hopPaths = section === 'top' ? block.outline.topHop : block.outline.bottomHop;
+    if (!hopPaths) return;
+
+    const lineHeight = hopPaths.lineHeight;
+    const posX = block.points[0]?.posX || 0;
+
+    // Calculate new position for the collapse group (count circle)
+    const collapseGroup = d3.select(`.hop-collapse-${section}-${blockId}`);
+    const newY = section === 'top' ? hopPaths.mainY : hopPaths.mainY;
+
+    // Animate the collapse group to new position
+    collapseGroup
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('transform', `translate(${posX}, ${newY})`);
+
+    // 1. Hide collapse button, show count circle
+    d3.select(`.hop-collapse-btn-${section}-${blockId}`)
+      .transition()
+      .duration(duration / 2)
+      .style('opacity', 0)
+      .on('end', function() {
+        d3.select(this).style('visibility', 'hidden');
+      });
+
+    d3.select(`.hop-collapse-btn-text-${section}-${blockId}`)
+      .transition()
+      .duration(duration / 2)
+      .style('opacity', 0)
+      .on('end', function() {
+        d3.select(this).style('visibility', 'hidden');
+      });
+
+    d3.select(`.hop-count-circle-${section}-${blockId}`)
+      .style('visibility', 'visible')
+      .style('opacity', 0)
+      .transition()
+      .delay(duration / 2)
+      .duration(duration / 2)
+      .style('opacity', 1);
+
+    d3.select(`.hop-count-text-${section}-${blockId}`)
+      .style('visibility', 'visible')
+      .style('opacity', 0)
+      .transition()
+      .delay(duration / 2)
+      .duration(duration / 2)
+      .style('opacity', 1);
+
+    // 2. Fade out nodes in this section
+    hopSection.nodeIds.forEach(nodeId => {
+      d3.select(`#point-${blockId}-${nodeId}`)
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .style('opacity', 0)
+        .on('end', function() {
+          d3.select(this).style('visibility', 'hidden');
+        });
+    });
+
+    // 3. Hide storylines connected to these nodes
+    hopSection.names.forEach(name => {
+      d3.selectAll(`.path-movable[name="${name}"], .symbol-movable[name="${name}"]`)
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .style('opacity', 0)
+        .on('end', function() {
+          d3.select(this).style('visibility', 'hidden');
+        });
+
+      // Also hide labels
+      d3.selectAll(`.labels, .mark-links`)
+        .filter(function() {
+          const elem = this as SVGElement;
+          const data = (elem as unknown as { __data__: { name: string } }).__data__;
+          return data?.name === name;
+        })
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .style('opacity', 0)
+        .on('end', function() {
+          d3.select(this).style('visibility', 'hidden');
+        });
+    });
+
+    // 4. Animate the hop section paths
+    const prefix = section === 'top' ? 'top-hop' : 'bottom-hop';
+    const translateY = section === 'top' ? lineHeight : -lineHeight;
+
+    // Animate line paths to 0 height (same start and end Y)
+    const startY = hopPaths.topY;
+    const collapsedLineLeft = `M${posX - this.data.blockWidth / 2},${startY} L${posX - this.data.blockWidth / 2},${startY}`;
+    const collapsedLineRight = `M${posX + this.data.blockWidth / 2},${startY} L${posX + this.data.blockWidth / 2},${startY}`;
+
+    d3.select(`#${prefix}-line-left-${blockId}`)
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('d', collapsedLineLeft);
+
+    d3.select(`#${prefix}-line-right-${blockId}`)
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('d', collapsedLineRight);
+
+    // Translate the top arc and bottom arc to meet at the collapsed position
+    if (section === 'top') {
+      // Top section: move top arc down, bottom arc stays (or also moves)
+      d3.select(`#${prefix}-top-arc-left-${blockId}`)
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .attr('transform', `translate(0, ${lineHeight})`);
+
+      d3.select(`#${prefix}-top-arc-right-${blockId}`)
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .attr('transform', `translate(0, ${lineHeight})`);
+
+      // Bottom arc stays at main position
+    } else {
+      // Bottom section: move bottom arc up, top arc stays
+      d3.select(`#${prefix}-bottom-arc-left-${blockId}`)
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .attr('transform', `translate(0, ${-lineHeight})`);
+
+      d3.select(`#${prefix}-bottom-arc-right-${blockId}`)
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .attr('transform', `translate(0, ${-lineHeight})`);
+    }
+  }
+
+  /**
+   * Expand a hop section with animation - restores the pill height
+   * Simple approach: animate line height back, translate arcs back
+   */
+  private _expandHopSection(blockId: number, section: 'top' | 'bottom', hopSection: HopSectionInfo): void {
+    const duration = 500;
+    const ease = d3.easeQuadInOut;
+    const block = this.data.blocks.find(b => b.id === blockId);
+    if (!block) return;
+
+    const hopPaths = section === 'top' ? block.outline.topHop : block.outline.bottomHop;
+    if (!hopPaths) return;
+
+    const posX = block.points[0]?.posX || 0;
+
+    // Restore collapse group to original position
+    const collapseGroup = d3.select(`.hop-collapse-${section}-${blockId}`);
+    const originalY = hopSection.centerY;
+
+    collapseGroup
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('transform', `translate(${posX}, ${originalY})`);
+
+    // 1. Hide count circle, show collapse button
+    d3.select(`.hop-count-circle-${section}-${blockId}`)
+      .transition()
+      .duration(duration / 2)
+      .style('opacity', 0)
+      .on('end', function() {
+        d3.select(this).style('visibility', 'hidden');
+      });
+
+    d3.select(`.hop-count-text-${section}-${blockId}`)
+      .transition()
+      .duration(duration / 2)
+      .style('opacity', 0)
+      .on('end', function() {
+        d3.select(this).style('visibility', 'hidden');
+      });
+
+    d3.select(`.hop-collapse-btn-${section}-${blockId}`)
+      .style('visibility', 'visible')
+      .style('opacity', 0)
+      .transition()
+      .delay(duration / 2)
+      .duration(duration / 2)
+      .style('opacity', 1);
+
+    d3.select(`.hop-collapse-btn-text-${section}-${blockId}`)
+      .style('visibility', 'visible')
+      .style('opacity', 0)
+      .transition()
+      .delay(duration / 2)
+      .duration(duration / 2)
+      .style('opacity', 1);
+
+    // 2. Fade in nodes in this section
+    hopSection.nodeIds.forEach(nodeId => {
+      d3.select(`#point-${blockId}-${nodeId}`)
+        .style('visibility', 'visible')
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .style('opacity', 1);
+    });
+
+    // 3. Show storylines connected to these nodes (if not filtered out)
+    hopSection.names.forEach(name => {
+      // Only show if not hidden by filter
+      if (this.visibility[name] === false) return;
+
+      d3.selectAll(`.path-movable[name="${name}"], .symbol-movable[name="${name}"]`)
+        .style('visibility', 'visible')
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .style('opacity', 1);
+
+      // Also show labels
+      d3.selectAll(`.labels, .mark-links`)
+        .filter(function() {
+          const elem = this as SVGElement;
+          const data = (elem as unknown as { __data__: { name: string } }).__data__;
+          return data?.name === name;
+        })
+        .style('visibility', 'visible')
+        .transition()
+        .duration(duration)
+        .ease(ease)
+        .style('opacity', 1);
+    });
+
+    // 4. Animate the hop section paths back to original
+    const prefix = section === 'top' ? 'top-hop' : 'bottom-hop';
+
+    // Restore line paths to original
+    d3.select(`#${prefix}-line-left-${blockId}`)
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('d', hopPaths.lineLeft);
+
+    d3.select(`#${prefix}-line-right-${blockId}`)
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('d', hopPaths.lineRight);
+
+    // Restore arc transforms to original (translate 0, 0)
+    d3.select(`#${prefix}-top-arc-left-${blockId}`)
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('transform', 'translate(0, 0)');
+
+    d3.select(`#${prefix}-top-arc-right-${blockId}`)
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('transform', 'translate(0, 0)');
+
+    d3.select(`#${prefix}-bottom-arc-left-${blockId}`)
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('transform', 'translate(0, 0)');
+
+    d3.select(`#${prefix}-bottom-arc-right-${blockId}`)
+      .transition()
+      .duration(duration)
+      .ease(ease)
+      .attr('transform', 'translate(0, 0)');
+  }
 
   // ============================================
   // Tooltip
