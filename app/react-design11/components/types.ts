@@ -99,6 +99,7 @@ export interface Mark {
 
 export interface StorylineLabel {
   label: string;
+  fullLabel: string;  // Full name for tooltip
   line: string;
   posX: number;
   posY: number;

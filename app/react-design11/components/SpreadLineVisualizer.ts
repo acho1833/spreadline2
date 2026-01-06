@@ -771,7 +771,7 @@ export class SpreadLinesVisualizer {
           .style('cursor', 'default');
 
         // Main label
-        container
+        const labelText = container
           .append('text')
           .attr('fill', d => d.color)
           .text(d => d.label.label)
@@ -784,6 +784,11 @@ export class SpreadLinesVisualizer {
           .style('visibility', d => d.label.visibility)
           .on('mouseover', (event, d) => this._lineHover(event, d))
           .on('mouseout', (event, d) => this._lineHoverOut(event, d));
+
+        // Add title element for tooltip (shows full name on hover if truncated)
+        labelText
+          .append('title')
+          .text(d => d.label.fullLabel || d.label.label);
 
         // Inline labels background
         container

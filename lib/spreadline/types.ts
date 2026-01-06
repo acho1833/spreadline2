@@ -433,6 +433,7 @@ export interface LabelResult {
   textAlign: string;
   line: string;
   label: string;
+  fullLabel: string;  // Full name for tooltip
   visibility?: string;
 }
 

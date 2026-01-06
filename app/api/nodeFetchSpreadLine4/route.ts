@@ -431,8 +431,8 @@ export async function GET(request: NextRequest) {
       minimize: 'wiggles'
     });
 
-    // Run pipeline
-    const result = SpreadLiner.fit(2800, 1000);
+    // Run pipeline (width 8400 = 3x original for wider spacing between pills)
+    const result = SpreadLiner.fit(8400, 1000);
 
     // Add metadata
     const response = {

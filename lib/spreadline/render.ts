@@ -439,7 +439,7 @@ class Renderer {
           { posX: 0, posY: 0, name: names[rIdx], size: 0 },
           { posX: 0, posY: 0, name: names[rIdx], size: 0 }
         ],
-        label: { posX: 0, posY: 0, textAlign: 'start', line: '', label: '' },
+        label: { posX: 0, posY: 0, textAlign: 'start', line: '', label: '', fullLabel: '' },
         inlineLabels: [],
         color: lineColor,
         id: rIdx,
@@ -528,17 +528,20 @@ class Renderer {
         ];
       }
 
-      // Prepare labels
+      // Prepare labels (no truncation - width is calculated dynamically)
       const dx = 12;
       const dxOffset = 10;
       const markOffset = 2;
+
+      const name = names[rIdx];
 
       update.label = {
         posX: lineStart[0][0] - dx,
         posY: lineStart[1],
         textAlign: 'end',
         line: `M${toSvgJoin([lineStart[0][0] - dxOffset, lineStart[1]])} L${toSvgJoin([lineStart[0][0] - markOffset, lineStart[1]])}`,
-        label: names[rIdx],
+        label: name,
+        fullLabel: name,
         visibility: 'visible'
       };
     }

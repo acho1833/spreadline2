@@ -295,7 +295,7 @@ def test_fetchspreadline_with_tracing():
         "FIT_PIPELINE_START",
         "Starting the 5-phase optimization pipeline",
         sample_data={
-            "width": 2800,
+            "width": 8400,
             "height": 1000
         }
     )
@@ -330,7 +330,7 @@ def test_fetchspreadline_with_tracing():
         "Converting to SVG paths and screen coordinates"
     )
 
-    result = SpreadLiner.fit(width=2800, height=1000)
+    result = SpreadLiner.fit(width=8400, height=1000)
 
     tracer.log_step(
         "FIT_PIPELINE_COMPLETE",

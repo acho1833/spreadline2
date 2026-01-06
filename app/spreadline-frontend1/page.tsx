@@ -138,8 +138,33 @@ function SpreadLineFrontendDemo() {
           minimize: data.config.minimize as 'space' | 'line' | 'wiggles'
         });
 
-        // Run pipeline and render
-        const result = spreadline.fit(2800, 1000);
+        // Calculate width dynamically based on longest name and number of timestamps
+        // Get all unique entity names
+        const allNames = new Set<string>();
+        data.topology.forEach(t => {
+          allNames.add(t.source);
+          allNames.add(t.target);
+        });
+        const longestName = Math.max(...Array.from(allNames).map(n => n.length));
+
+        // Estimate label width: ~8px per character + generous padding for 2x spacing
+        const labelWidth = longestName * 8 + 80;
+
+        // Width per timestamp should accommodate the label with 2x spacing
+        const numTimestamps = new Set(data.topology.map(t => t.time)).size;
+        const minWidthPerTimestamp = Math.max(200, labelWidth);  // Minimum 200px per timestamp for 2x spacing
+        const dynamicWidth = numTimestamps * minWidthPerTimestamp;
+
+        console.log('SpreadLine Dynamic Width Calculation:', {
+          longestName,
+          labelWidth,
+          numTimestamps,
+          minWidthPerTimestamp,
+          dynamicWidth
+        });
+
+        const result = spreadline.fit(dynamicWidth, 1000);
+        console.log('SpreadLine Result bandWidth:', result.bandWidth, 'blockWidth:', result.blockWidth);
 
         const endTime = performance.now();
         setComputeTime(endTime - startTime);
